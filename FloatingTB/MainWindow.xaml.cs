@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Interop;
@@ -30,9 +31,13 @@ namespace FloatingTB
         public int startWidth = 0;
         public double expandedWidth = 0;
         public double collapsedWidth = 0;
-        IntPtr taskbarHandle;
-        IntPtr startHandle;
-        IntPtr localHandle;
+        public IntPtr localHandle;
+        public IntPtr hostHandle;
+
+        public IntPtr taskbarHandle;
+        public RECT taskbarRect;
+        public IntPtr startHandle;
+        public RECT startRect;
 
 
         public MainWindow()
@@ -42,11 +47,11 @@ namespace FloatingTB
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            taskbarHandle = User32.FindWindowEx(User32.FindWindowEx(IntPtr.Zero, IntPtr.Zero, "Shell_TrayWnd", null), IntPtr.Zero, "ReBarWindow32", null);
-            startHandle = User32.FindWindowEx(User32.FindWindowEx(IntPtr.Zero, IntPtr.Zero, "Shell_TrayWnd", null), IntPtr.Zero, "Start", null);
+            hostHandle = User32.FindWindowEx(IntPtr.Zero, IntPtr.Zero, "Shell_TrayWnd", null);
+            taskbarHandle = User32.FindWindowEx(hostHandle, IntPtr.Zero, "ReBarWindow32", null);
+            startHandle = User32.FindWindowEx(hostHandle, IntPtr.Zero, "Start", null);
             localHandle = new WindowInteropHelper(this).Handle;
-            RECT taskbarRect;
-            RECT startRect;
+
             User32.GetWindowRect(taskbarHandle, out taskbarRect);
             User32.GetWindowRect(startHandle, out startRect);
 
@@ -113,6 +118,15 @@ namespace FloatingTB
         private void TaskbarWindow_MouseLeave(object sender, MouseEventArgs e)
         {
             User32.SetWindowPos(startHandle, IntPtr.Zero, taskbarPadding, taskbarPadding, startWidth, taskbarHeight, 0);
+        }
+
+        private void TaskbarWindow_Closing(object sender, EventArgs e)
+        {
+            //Process.Start("cmd", "/c taskkill /im explorer.exe /f && explorer.exe");
+            User32.SetWindowPos(taskbarHandle, IntPtr.Zero, taskbarRect.left, taskbarRect.top, taskbarRect.right - taskbarRect.left, taskbarRect.bottom - taskbarRect.top, 0);
+            User32.SetParent(taskbarHandle, hostHandle);
+            User32.SetWindowPos(startHandle, IntPtr.Zero, startRect.left, startRect.top, startRect.right - startRect.left, startRect.bottom - startRect.top, 0);
+            User32.SetParent(startHandle, hostHandle);
         }
     }
 }

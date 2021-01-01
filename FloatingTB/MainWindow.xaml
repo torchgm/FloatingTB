@@ -14,6 +14,7 @@
         x:Name="TaskbarWindow"
         MouseEnter="TaskbarWindow_MouseEnter"
         MouseLeave="TaskbarWindow_MouseLeave"
+        Closing="TaskbarWindow_Closing"
         fw:AcrylicWindowStyle="None" ShowInTaskbar="False" ResizeMode="NoResize" WindowStartupLocation="CenterScreen" Topmost="True" WindowStyle="None">
     <fw:AcrylicWindow.Triggers>
         <EventTrigger RoutedEvent="ui:PathIcon.MouseRightButtonDown">
